@@ -488,10 +488,13 @@ elif st.session_state.mobile_verified:
                     st.error("Failed to delete logs.")
 
     with tabs[3]:  # Developer Details Tab
-        st.subheader("It’s Basically AI 🤖")
+        st.header("AI: The genius 🤖")
+        st.subheader("""
+            Dhiraj: The one who takes credit (and the blame) 😎🔧
+        """)
 
         st.markdown("""
-        -Please do email me at dhiraj1810.db@gmail.com if you have any questions or feedback.  
-        -I’m open to new ideas and collaborations. Thank you for using this app! ✌🏽  
+        - Need Help ?   
+        Please do email me at dhiraj1810.db@gmail.com if you have any questions or feedback.  
+        I’m open to new ideas and collaborations. Thank you for using this app! ✌🏽  
             """)
-        #st.write("Email : darkcoders2016@gmail.com")

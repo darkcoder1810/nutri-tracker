@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 from datetime import datetime
 import pytz
+import toml
 
 # Prepare row data
 ist_tz = pytz.timezone('Asia/Kolkata')  # Define the IST timezone
@@ -124,47 +125,81 @@ def load_user_info():
         return None
 
 
+# def get_sheets_client():
+#     """Initialize and return Google Sheets client."""
+#     try:
+#         # Load credentials from environment variable
+#         creds_json = os.getenv('GOOGLE_SHEETS_CREDENTIALS')
+#         if not creds_json:
+#             raise ValueError(
+#                 "Google Sheets credentials not found in environment")
+
+#         credentials_dict = json.loads(creds_json)
+
+#         # Define the scope - explicitly include both APIs
+#         scope = [
+#             'https://spreadsheets.google.com/feeds',
+#             'https://www.googleapis.com/auth/drive',
+#             'https://www.googleapis.com/auth/spreadsheets'
+#         ]
+
+#         # Authorize with credentials
+#         creds = ServiceAccountCredentials.from_json_keyfile_dict(
+#             credentials_dict, scope)
+#         client = gspread.authorize(creds)
+
+#         # Test the connection by listing spreadsheets
+#         try:
+#             client.list_spreadsheet_files()
+#         except Exception as e:
+#             if "PERMISSION_DENIED" in str(e):
+#                 st.error(
+#                     "Google Drive API access denied. Please ensure the API is enabled in Google Cloud Console."
+#                 )
+#             raise
+
+#         return client
+#     except json.JSONDecodeError:
+#         st.error("Invalid JSON format in Google Sheets credentials")
+#         raise
+#     except Exception as e:
+#         st.error(f"Error initializing sheets client: {str(e)}")
+#         raise
+
 def get_sheets_client():
     """Initialize and return Google Sheets client."""
     try:
-        # Load credentials from environment variable
-        creds_json = os.getenv('GOOGLE_SHEETS_CREDENTIALS')
-        if not creds_json:
-            raise ValueError(
-                "Google Sheets credentials not found in environment")
-
-        credentials_dict = json.loads(creds_json)
-
-        # Define the scope - explicitly include both APIs
+        # Load credentials from secrets.toml
+        secrets = toml.load('.streamlit/secrets.toml')
+        if not secrets.get('google_sheets'):
+            raise ValueError("No Google Sheets credentials found in secrets.toml")
+        credentials_dict = {
+            "type": "service_account",
+            "project_id": secrets['google_sheets']['project_id'],
+            "private_key_id": secrets['google_sheets']['private_key_id'],
+            "private_key": secrets['google_sheets']['private_key'].replace("\\n", "\n"),
+            "client_email": secrets['google_sheets']['client_email'],
+            "client_id": secrets['google_sheets']['client_id'],
+            "auth_uri": secrets['google_sheets']['auth_uri'],
+            "token_uri": secrets['google_sheets']['token_uri'],
+            "auth_provider_x509_cert_url": secrets['google_sheets']['auth_provider_x509_cert_url'],
+            "client_x509_cert_url": secrets['google_sheets']['client_x509_cert_url']
+        }
+        # Define the scope
         scope = [
             'https://spreadsheets.google.com/feeds',
             'https://www.googleapis.com/auth/drive',
             'https://www.googleapis.com/auth/spreadsheets'
         ]
-
         # Authorize with credentials
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(
-            credentials_dict, scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
         client = gspread.authorize(creds)
-
-        # Test the connection by listing spreadsheets
-        try:
-            client.list_spreadsheet_files()
-        except Exception as e:
-            if "PERMISSION_DENIED" in str(e):
-                st.error(
-                    "Google Drive API access denied. Please ensure the API is enabled in Google Cloud Console."
-                )
-            raise
-
+        # Test the connection
+        client.list_spreadsheet_files()
         return client
-    except json.JSONDecodeError:
-        st.error("Invalid JSON format in Google Sheets credentials")
-        raise
     except Exception as e:
         st.error(f"Error initializing sheets client: {str(e)}")
         raise
-
 
 def get_sheet():
     """Get the existing food database sheet."""

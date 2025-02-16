@@ -298,7 +298,7 @@ elif st.session_state.mobile_verified:
                         st.rerun()
 
     with tabs[1]:  # Add Food tab
-        st.header("Add New Food")
+        st.header("Add New Food To Database")
         # Add new food to database
 
         # Check for form reset

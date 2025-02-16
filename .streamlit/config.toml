@@ -7,7 +7,7 @@ port = 8501
 primaryColor = "#2ECC71"
 secondaryBackgroundColor = "#F8F9FA"
 textColor = "#2C3E50"
-font = "Inter"
+font = "sans serif"
 
 [global]
 showWarningOnDirectExecution = false

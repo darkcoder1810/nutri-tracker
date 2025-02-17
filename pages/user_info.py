@@ -1,5 +1,6 @@
 import streamlit as st
 from sheets_db import load_user_info, save_user_info
+import time
 
 # Page config
 st.set_page_config(page_title="User Information", page_icon="👤", layout="wide")
@@ -7,6 +8,13 @@ st.set_page_config(page_title="User Information", page_icon="👤", layout="wide
 # Load custom CSS
 with open('.streamlit/style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+# Check if user mobile number exists
+if 'mobile' not in st.session_state or not st.session_state.mobile:
+    st.warning("Mobile number not found. Redirecting to login...")
+    time.sleep(2)
+    st.session_state.mobile_verified = False  # Ensure mobile verified is reset
+    st.switch_page("main.py")  # Redirect to main.py or main page
 
 # Check if user exists and set appropriate title
 if 'user_info' in st.session_state and st.session_state.user_info:
@@ -35,7 +43,7 @@ def show_user_info_form():
                                     st.session_state.user_info.get(
                                         'calorie_mode', 'maintenance')))
 
-        st.subheader("Macro Settings [ leave default if not sure ]" )
+        st.subheader("Macro Settings [ leave default if not sure ]")
         protein_per_kg = st.slider(
             "Protein (g) per kg of bodyweight", 1.6, 3.0,
             float(st.session_state.user_info.get('protein_per_kg', 1.8)))
@@ -70,6 +78,10 @@ def show_user_info_form():
                 if save_user_info(user_data):
                     st.session_state.user_info = user_data
                     st.success("Information saved successfully!")
+                    st.success("Redirecting to login... Please wait")
+                    time.sleep(2)
+                    st.session_state.mobile_verified = False  # Ensure mobile verified is reset
+                    st.switch_page("main.py")
                     return True
                 else:
                     st.error("Error saving information")

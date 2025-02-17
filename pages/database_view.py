@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from utils import load_food_database
 from sheets_db import delete_food
+import time
 
 # Page config
 st.set_page_config(page_title="Food Database", page_icon="🗄️", layout="wide")
@@ -9,6 +10,13 @@ st.set_page_config(page_title="Food Database", page_icon="🗄️", layout="wide
 # Load custom CSS
 with open('.streamlit/style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+# Check if user mobile number exists
+if 'mobile' not in st.session_state or not st.session_state.mobile:
+    st.warning("Mobile number not found. Redirecting to login...")
+    time.sleep(2)
+    st.session_state.mobile_verified = False  # Ensure mobile verified is reset
+    st.switch_page("main.py")  # Redirect to main.py or main page
 
 # Page title
 st.title("🗄️ Food Database")

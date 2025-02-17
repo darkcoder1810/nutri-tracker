@@ -6,6 +6,7 @@ from utils import (calculate_calories, calculate_macros, load_food_database,
                    save_food_to_database, calculate_calories_from_macros,
                    food_exists_in_database)
 from sheets_db import load_user_info, save_user_info, save_meal_log, get_daily_logs, delete_logs_by_date_range, get_daily_summaries
+import time
 
 import pytz
 
@@ -78,7 +79,19 @@ elif st.session_state.mobile_verified:
 
         # Sidebar for user info and goals
         with st.sidebar:
-            st.header("User Information")
+            #st.header("User Information", )
+            animated_css = """
+            <style>
+                .hover-header:hover {
+                    color: #FF4B4B;
+                    transition: color 0.3s ease;
+                }
+            </style>
+            """
+            st.markdown(animated_css, unsafe_allow_html=True)
+            st.markdown("<h2 class='hover-header'>💀 User Information</h2>",
+                        unsafe_allow_html=True)
+
             full_name = st.session_state.user_info.get('full_name', 'iHacK')
             st.write(f"Name: {full_name}")  # Displaying Full Name
             weight = st.session_state.user_info.get('weight', 70.0)
@@ -87,6 +100,22 @@ elif st.session_state.mobile_verified:
                 st.session_state.user_info['mobile'] = st.session_state.mobile
 
             st.write(f"Weight: {weight} kg")
+
+            # Sign Out Button
+            if st.button("Sign Out"):
+                # Resetting the session state
+                st.session_state.mobile_verified = False
+                st.session_state.mobile = None
+                st.session_state.user_info = {}
+                st.session_state.daily_log = {
+                    'breakfast': [],
+                    'lunch': [],
+                    'snacks': [],
+                    'dinner': []
+                }
+                st.success("You have been signed out.")
+                time.sleep(2)
+                st.rerun()  # Refresh the app
 
             # Calorie mode selection
             st.header("Calorie Mode")
@@ -298,7 +327,7 @@ elif st.session_state.mobile_verified:
                         st.rerun()
 
     with tabs[1]:  # Add Food tab
-        st.header("Add New Food To Database")
+        st.header("Add New Food")
         # Add new food to database
 
         # Check for form reset
@@ -494,7 +523,10 @@ elif st.session_state.mobile_verified:
         """)
 
         st.markdown("""
-        - Need Help ?   
-        Please do email me at dhiraj1810.db@gmail.com if you have any questions or feedback.  
-        I’m open to new ideas and collaborations. Thank you for using this app! ✌🏽  
+         Need Help ?   
+        -Please do email me at dhiraj1810.db@gmail.com if you have any questions or feedback   
+       -I’m open to new ideas and collaborations. Thank you for using this app! ✌🏽  
             """)
+        #st.write("Email : darkcoders2016@gmail.com")
+
+    #with tabs[4]:

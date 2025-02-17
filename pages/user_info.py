@@ -8,7 +8,11 @@ st.set_page_config(page_title="User Information", page_icon="👤", layout="wide
 with open('.streamlit/style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-st.title("👤 User Information")
+# Check if user exists and set appropriate title
+if 'user_info' in st.session_state and st.session_state.user_info:
+    st.title("👤 Update User Information")
+else:
+    st.title("👤 User Registration")
 
 
 def show_user_info_form():
@@ -31,10 +35,10 @@ def show_user_info_form():
                                     st.session_state.user_info.get(
                                         'calorie_mode', 'maintenance')))
 
-        st.subheader("Macro Settings")
+        st.subheader("Macro Settings [ leave default if not sure ]" )
         protein_per_kg = st.slider(
             "Protein (g) per kg of bodyweight", 1.6, 3.0,
-            float(st.session_state.user_info.get('protein_per_kg', 2.0)))
+            float(st.session_state.user_info.get('protein_per_kg', 1.8)))
         fat_percent = st.slider(
             "Fat (% of total calories)", 20, 35,
             int(

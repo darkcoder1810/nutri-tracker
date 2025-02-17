@@ -37,7 +37,7 @@ if 'mobile_verified' not in st.session_state:
 # Mobile number verification section
 if not st.session_state.mobile_verified:
     st.title("Welcome to NutriTracker")
-    st.subheader("Please enter your mobile number to continue")
+    st.subheader("Please enter your mobile number to login :")
 
     mobile = st.text_input("Mobile Number",
                            max_chars=10)  # Limit to 10 characters

@@ -16,6 +16,68 @@ ist_tz = pytz.timezone('Asia/Kolkata')  # Define the IST timezone
 # Page configuration
 st.set_page_config(page_title="Calorie Tracker", layout="wide")
 
+# Add this CSS injection after page config
+st.markdown("""
+    <style>
+    /* Ensure columns stay side by side on mobile */
+    @media (max-width: 640px) {
+        div[data-testid="column"] {
+            width: calc(50% - 1rem) !important;
+            flex: 1 1 calc(50% - 1rem) !important;
+            min-width: calc(50% - 1rem) !important;
+        }
+    }
+
+    /* Style metric containers */
+    div[data-testid="metric-container"] {
+        background-color: rgba(28, 131, 225, 0.1);
+        border: 1px solid rgba(28, 131, 225, 0.1);
+        border-radius: 5px;
+        padding: 0.5rem;
+        margin: 0.25rem 0;
+    }
+    /* Custom styling for metrics grid */
+    .metrics-grid-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+
+    div[data-testid="metric-container"] {
+        width: 200px !important;
+        flex: 0 0 200px !important;
+        background-color: rgba(28, 131, 225, 0.1);
+        border: 1px solid rgba(28, 131, 225, 0.1);
+        border-radius: 5px;
+        padding: 1rem;
+        margin: 0.5rem !important;
+        transition: all 0.3s ease;
+    }
+
+    div[data-testid="metric-container"]:hover {
+        background-color: rgba(28, 131, 225, 0.2);
+        transform: translateY(-2px);
+    }
+
+    div[data-testid="metric-container"] > div {
+        text-align: center;
+    }
+
+    div[data-testid="stMetricValue"] {
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
+    }
+
+    div[data-testid="stMetricDelta"] {
+        font-size: 0.8rem !important;
+    }
+    </style>
+""",
+            unsafe_allow_html=True)
+
 # Load custom CSS
 with open('.streamlit/style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
@@ -69,13 +131,14 @@ elif st.session_state.mobile_verified:
         ["🏠 Home", "➕ Add Food", "📊 Daily Log", "👨🏾‍💻 About Developer"])
 
     with tabs[0]:  # Home tab
-        st.header("Welcome to NutriTracker")
+        #st.header("Welcome to NutriTracker")
+        st.header("🥗 Calorie & Macro Tracker")
         # Rest of the home content
         # Load food database
         food_db = load_food_database()
 
         # Main title
-        st.title("🥗 Calorie & Macro Tracker")
+        #st.title("🥗 Calorie & Macro Tracker")
 
         # Sidebar for user info and goals
         with st.sidebar:
@@ -154,125 +217,88 @@ elif st.session_state.mobile_verified:
             st.write(f"Carbs: {carb_target:.1f}g")
 
         # Display daily totals and progress
-        st.header("Daily Progress")
+        #st.header("Daily Progress")
 
         # Get today's logs from Google Sheets
-        today = datetime.now(pytz.timezone('Asia/Kolkata')).strftime(
-            '%d-%m-%Y')  # Ensure today's date is formatted correctly in IST
+        today = datetime.now(
+            pytz.timezone('Asia/Kolkata')).strftime('%d-%m-%Y')
         today_logs = get_daily_logs(st.session_state.mobile, today)
+        # Initialize totals
+        total_calories = total_protein = total_fat = total_carbs = 0
+        # Calculate totals from today's logs
         if today_logs:
             total_calories = sum(log['Calories'] for log in today_logs)
             total_protein = sum(log['Protein'] for log in today_logs)
             total_fat = sum(log['Fat'] for log in today_logs)
             total_carbs = sum(log['Carbs'] for log in today_logs)
-        else:
-            total_calories = total_protein = total_fat = total_carbs = 0
-
-        # Calories status calculation
+        # Calculate differences
         calorie_difference = target_calories - total_calories
-        status_color_calories = "#2ECC71" if calorie_difference >= 0 else "#E74C3C"
-        calories_status_text = f"{abs(calorie_difference):.0f} kcal<br> {'remaining' if calorie_difference >= 0 else 'over'}"
-        fig_calories = go.Figure()
-        fig_calories.add_trace(
-            go.Indicator(
-                mode="number",
-                value=total_calories,
-                title={
-                    'text':
-                    f"Total Calories<br><span style='color: {status_color_calories}'>{calories_status_text}</span>"
-                }))
-        fig_calories.update_layout(height=250)  # Update the height here
-
-        # Protein status calculation
         protein_difference = protein_target - total_protein
-        status_color_protein = "#2ECC71" if protein_difference >= 0 else "#E74C3C"
-        protein_status_text = f"{abs(protein_difference):.0f} g<br> {'remaining' if protein_difference >= 0 else 'over'}"
-        fig_protein = go.Figure()
-        fig_protein.add_trace(
-            go.Indicator(
-                mode="number",
-                value=total_protein,
-                title={
-                    'text':
-                    f"Total Protein (g)<br><span style='color: {status_color_protein}'>{protein_status_text}</span>"
-                }))
-        fig_protein.update_layout(height=250)  # Update the height here
-
-        # Fat status calculation
         fat_difference = fat_target - total_fat
-        status_color_fat = "#2ECC71" if fat_difference >= 0 else "#E74C3C"
-        fat_status_text = f"{abs(fat_difference):.0f} g<br> {'remaining' if fat_difference >= 0 else 'over'}"
-        fig_fat = go.Figure()
-        fig_fat.add_trace(
-            go.Indicator(
-                mode="number",
-                value=total_fat,
-                title={
-                    'text':
-                    f"Total Fat (g)<br><span style='color: {status_color_fat}'>{fat_status_text}</span>"
-                }))
-        fig_fat.update_layout(height=250)  # Update the height here
-
-        # Carbs status calculation
         carbs_difference = carb_target - total_carbs
-        status_color_carbs = "#2ECC71" if carbs_difference >= 0 else "#E74C3C"
-        carbs_status_text = f"{abs(carbs_difference):.0f} g<br> {'remaining' if carbs_difference >= 0 else 'over'}"
-        fig_carbs = go.Figure()
-        fig_carbs.add_trace(
-            go.Indicator(
-                mode="number",
-                value=total_carbs,
-                title={
-                    'text':
-                    f"Total Carbs (g)<br><span style='color: {status_color_carbs}'>{carbs_status_text}</span>"
-                }))
-        fig_carbs.update_layout(height=250)  # Update the height here
 
-        # Display charts in a single row using columns
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.plotly_chart(fig_calories, use_container_width=True)
-        with col2:
-            st.plotly_chart(fig_protein, use_container_width=True)
-        with col3:
-            st.plotly_chart(fig_fat, use_container_width=True)
-        with col4:
-            st.plotly_chart(fig_carbs, use_container_width=True)
+        # Create a layout for the progress
+        #st.header("🍽️ Calories Consumed for the Day:")
+        st.header("Daily Progress")
 
-        # # Clear daily log button
-        # if st.button("Clear Daily Log"):
-        #     st.session_state.daily_log = {
-        #         'breakfast': [],
-        #         'lunch': [],
-        #         'snacks': [],
-        #         'dinner': []
-        #     }
-        #     st.rerun()
+        # Create two rows with two columns each for mobile-friendly layout
+        row1_col1, row1_col2 = st.columns(2)
+        row2_col1, row2_col2 = st.columns(2)
+
+        # First row
+        with row1_col1:
+            st.metric(
+                "Total Calories",
+                f"{total_calories:.0f}",
+                delta=
+                f"{abs(calorie_difference):.0f} kcal {'remaining ↓' if calorie_difference >= 0 else 'over ↑'}",
+                delta_color="normal" if calorie_difference >= 0 else "inverse")
+        with row1_col2:
+            st.metric(
+                "Protein",
+                f"{total_protein:.1f}g",
+                delta=
+                f"{abs(protein_difference):.1f}g {'remaining ↓' if protein_difference >= 0 else 'over ↑'}",
+                delta_color="normal" if protein_difference >= 0 else "inverse")
+        # Second row
+        with row2_col1:
+            st.metric(
+                "Fat",
+                f"{total_fat:.1f}g",
+                delta=
+                f"{abs(fat_difference):.1f}g {'remaining ↓' if fat_difference >= 0 else 'over ↑'}",
+                delta_color="normal" if fat_difference >= 0 else "inverse")
+        with row2_col2:
+            st.metric(
+                "Carbs",
+                f"{total_carbs:.1f}g",
+                delta=
+                f"{abs(carbs_difference):.1f}g {'remaining ↓' if carbs_difference >= 0 else 'over ↑'}",
+                delta_color="normal" if carbs_difference >= 0 else "inverse")
 
         # Food logging section
         st.header("Log Your Meals")
-        meal_types = ['breakfast', 'lunch', 'snacks', 'dinner']
 
-        for meal_type in meal_types:
-            with st.container():
-                st.subheader(f"{meal_type.title()}")
-                col1, col2, col3 = st.columns([2, 1, 1])
+        meal_options = ['Breakfast', 'Lunch', 'Evening Snacks', 'Dinner']
+        selected_meal_type = st.selectbox("Select Meal Type",
+                                          options=meal_options)
 
-                with col1:
-                    # Food selection with integrated search
-                    if not food_db.empty and 'Food Name' in food_db.columns:
-                        food_selection = st.selectbox(
-                            f"Select food for {meal_type}",
-                            options=food_db['Food Name'].tolist(),
-                            key=f"food_select_{meal_type}",
-                            placeholder="Search for food...",
-                        )
-                    else:
-                        st.warning("No foods available in database")
-                        continue
+        with st.container():
+            col1, col2, col3 = st.columns([2, 1, 1])
 
-                with col2:
-                    # Get the basis for the selected food
+            with col1:
+                # Initialize the dropdown with an empty string placeholder
+                if 'food_selection' not in st.session_state:
+                    st.session_state.food_selection = ""  # Reset initial value
+
+                food_selection = st.selectbox(
+                    f"Select food for {selected_meal_type}",
+                    options=[""] + food_db['Food Name'].tolist(),
+                    key=f"food_select_{selected_meal_type}")
+
+            with col2:
+                # Initialize portion variable
+                if food_selection:  # Proceed only if food_selection is not empty
                     selected_food = food_db[food_db['Food Name'] ==
                                             food_selection].iloc[0]
                     basis = selected_food.get('Basis', 'gm')
@@ -280,18 +306,26 @@ elif st.session_state.mobile_verified:
                     # Display portion input with dynamic unit
                     portion_unit = 'p' if basis == 'p' else (
                         'ml' if basis == 'ml' else 'gm')
+
+                    if 'portion' not in st.session_state:
+                        st.session_state.portion = 0.0  # Set initial value as a float
+
                     portion = st.number_input(
                         f"Portion ({portion_unit})",
-                        min_value=0.0,
-                        max_value=1000.0,
-                        step=1.0 if basis == 'p' else 10.0,
-                        key=f"portion_{meal_type}")
+                        min_value=0.0,  # Float
+                        max_value=1000.0,  # Float
+                        step=1.0 if basis == 'p' else 10.0,  # Float
+                        value=float(
+                            st.session_state.portion),  # Ensure value is float
+                        key=f"portion_{selected_meal_type}")
+                else:
+                    portion = 0.0  # Reset portion input as a float
 
-                with col3:
-                    if st.button("Add", key=f"add_{meal_type}"):
+            with col3:
+                if st.button("Add", key=f"add_{selected_meal_type}"):
+                    if food_selection:  # Proceed if valid food is selected
                         food_item = food_db[food_db['Food Name'] ==
                                             food_selection].iloc[0]
-                        # Calculate multiplier based on basis
                         base_weight = 100 if basis != 'p' else 1
                         multiplier = portion / base_weight
 
@@ -304,14 +338,15 @@ elif st.session_state.mobile_verified:
                             'portion': portion,
                             'unit': portion_unit
                         }
+
                         # Add to session state
-                        st.session_state.daily_log[meal_type].append(
-                            logged_item)
+                        st.session_state.daily_log[
+                            selected_meal_type.lower()] = logged_item
 
                         # Save to daily log sheet
                         meal_log = {
                             'mobile': st.session_state.mobile,
-                            'meal_type': meal_type,
+                            'meal_type': selected_meal_type,
                             'weight': portion,
                             'basis': basis,
                             'food_name': food_item['Food Name'],
@@ -323,8 +358,18 @@ elif st.session_state.mobile_verified:
                         }
                         save_meal_log(meal_log)
 
-                        # Rerun to refresh the chart/UI
-                        st.rerun()
+                        st.success(
+                            f"{food_item['Food Name']} added for {selected_meal_type}!"
+                        )
+
+                        # Reset inputs after adding a meal
+                        st.session_state.food_selection = ""  # Reset food selection
+                        st.session_state.portion = 0.0  # Reset portion input
+
+                        st.rerun()  # Refresh the UI
+
+                    else:
+                        st.warning("Please select a food item.")
 
     with tabs[1]:  # Add Food tab
         st.header("Add New Food")

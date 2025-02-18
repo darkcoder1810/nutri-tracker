@@ -77,27 +77,24 @@ if not food_db.empty:
 
 # Display the table with delete buttons
 if not filtered_db.empty:
-    # Create two columns - one for the dataframe and one for delete buttons
-    col1, col2 = st.columns([15, 1])
-
-    with col1:
-        st.dataframe(
-            filtered_db,
-            column_config={
-                "Food Name":
-                st.column_config.TextColumn("Food Name"),
-                "Calories":
-                st.column_config.NumberColumn("Calories (kcal)",
-                                              format="%.1f"),
-                "Protein":
-                st.column_config.NumberColumn("Protein (g)", format="%.1f"),
-                "Fat":
-                st.column_config.NumberColumn("Fat (g)", format="%.1f"),
-                "Carbs":
-                st.column_config.NumberColumn("Carbs (g)", format="%.1f"),
-            },
-            hide_index=True,
-        )
+    st.dataframe(
+        filtered_db,
+        column_config={
+            "Food Name":
+            st.column_config.TextColumn("Food Name"),
+            "Calories":
+            st.column_config.NumberColumn("Calories (kcal)", format="%.1f"),
+            "Protein":
+            st.column_config.NumberColumn("Protein (g)", format="%.1f"),
+            "Fat":
+            st.column_config.NumberColumn("Fat (g)", format="%.1f"),
+            "Carbs":
+            st.column_config.NumberColumn("Carbs (g)", format="%.1f"),
+        },
+        hide_index=True,
+        use_container_width=
+        True  # Ensures the dataframe uses the container's full width
+    )
 
     # with col2:
     #     # Custom CSS for delete buttons

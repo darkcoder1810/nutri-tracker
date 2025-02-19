@@ -180,29 +180,25 @@ elif st.session_state.mobile_verified:
                 time.sleep(2)
                 st.rerun()  # Refresh the app
 
-            # Calorie mode selection
-            st.header("Calorie Mode")
-            calorie_mode = st.radio(
-                "Select calorie target",
-                options=['maintenance', 'bulk', 'deficit'],
-                index=['maintenance', 'bulk', 'deficit'
-                       ].index(st.session_state.user_info['calorie_mode']))
-            st.session_state.user_info['calorie_mode'] = calorie_mode
-
-            # Macro customization
-            st.header("Macro Settings")
-            protein_per_kg = st.slider(
-                "Protein (g) per kg of bodyweight", 1.6, 3.0,
-                st.session_state.user_info['protein_per_kg'], 0.1)
-            st.session_state.user_info['protein_per_kg'] = protein_per_kg
-
-            fat_percent = st.slider(
-                "Fat (% of total calories)", 20, 35,
-                int(st.session_state.user_info['fat_percent'] * 100), 5) / 100
-            st.session_state.user_info['fat_percent'] = fat_percent
-
-            # Save user info whenever it changes
-            save_user_info(st.session_state.user_info)
+            # Initialize session state for user_info if not present
+            if 'user_info' not in st.session_state:
+                st.session_state.user_info = {}
+            # Set default values if not already defined
+            if 'calorie_mode' not in st.session_state.user_info:
+                st.session_state.user_info['calorie_mode'] = 'maintenance'  # Default value
+            if 'protein_per_kg' not in st.session_state.user_info:
+                st.session_state.user_info['protein_per_kg'] = 1.8  # Default value
+            if 'fat_percent' not in st.session_state.user_info:
+                st.session_state.user_info['fat_percent'] = 0.25  # Default value
+            # Load user information from the database
+            loaded_user_info = load_user_info()
+            if loaded_user_info:
+                st.session_state.user_info.update(loaded_user_info)
+            # Ensure that weight is set for calculations
+            weight = st.session_state.user_info.get('weight', 70.0)
+            calorie_mode = st.session_state.user_info['calorie_mode']
+            protein_per_kg = st.session_state.user_info['protein_per_kg']
+            fat_percent = st.session_state.user_info['fat_percent']# Accessing calorie_mode correctly
 
             # Calculate target calories based on mode
             target_calories = calculate_calories(weight, calorie_mode)

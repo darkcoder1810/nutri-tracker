@@ -185,11 +185,14 @@ elif st.session_state.mobile_verified:
                 st.session_state.user_info = {}
             # Set default values if not already defined
             if 'calorie_mode' not in st.session_state.user_info:
-                st.session_state.user_info['calorie_mode'] = 'maintenance'  # Default value
+                st.session_state.user_info[
+                    'calorie_mode'] = 'maintenance'  # Default value
             if 'protein_per_kg' not in st.session_state.user_info:
-                st.session_state.user_info['protein_per_kg'] = 1.8  # Default value
+                st.session_state.user_info[
+                    'protein_per_kg'] = 1.8  # Default value
             if 'fat_percent' not in st.session_state.user_info:
-                st.session_state.user_info['fat_percent'] = 0.25  # Default value
+                st.session_state.user_info[
+                    'fat_percent'] = 0.25  # Default value
             # Load user information from the database
             loaded_user_info = load_user_info()
             if loaded_user_info:
@@ -198,7 +201,8 @@ elif st.session_state.mobile_verified:
             weight = st.session_state.user_info.get('weight', 70.0)
             calorie_mode = st.session_state.user_info['calorie_mode']
             protein_per_kg = st.session_state.user_info['protein_per_kg']
-            fat_percent = st.session_state.user_info['fat_percent']# Accessing calorie_mode correctly
+            fat_percent = st.session_state.user_info[
+                'fat_percent']  # Accessing calorie_mode correctly
 
             # Calculate target calories based on mode
             target_calories = calculate_calories(weight, calorie_mode)
@@ -276,7 +280,7 @@ elif st.session_state.mobile_verified:
         st.header("Log Your Meals")
 
         meal_options = ['Breakfast', 'Lunch', 'Evening Snacks', 'Dinner']
-        selected_meal_type = st.selectbox("Select Meal Type",
+        selected_meal_type = st.selectbox("**Select Meal Type**",
                                           options=meal_options)
 
         st.markdown("""
@@ -316,7 +320,7 @@ elif st.session_state.mobile_verified:
                 st.session_state.food_selection = ""  # Reset initial value
 
             food_selection = st.selectbox(
-                f"Select food for {selected_meal_type}",
+                f"**Select food for {selected_meal_type}**",
                 options=[""] + food_db['Food Name'].tolist(),
                 key=f"food_select_{selected_meal_type}")
 
@@ -338,7 +342,7 @@ elif st.session_state.mobile_verified:
                     st.session_state.portion = 0.0  # Set initial value as a float
 
                 portion = st.number_input(
-                    f"Portion ({portion_unit})",
+                    f"**Portion ({portion_unit})**",
                     min_value=0.0,  # Float
                     max_value=1000.0,  # Float
                     step=1.0 if basis == 'p' else 10.0,  # Float
@@ -573,11 +577,11 @@ elif st.session_state.mobile_verified:
         st.subheader("Clear Specific Logs")
         col1, col2 = st.columns(2)
         with col1:
-            start_date = st.date_input("Select start date to clear logs",
+            start_date = st.date_input("Select **start date** to clear logs",
                                        value=datetime.now().date(),
                                        key="start_date")
         with col2:
-            end_date = st.date_input("Select end date to clear logs",
+            end_date = st.date_input("Select **end date** to clear logs",
                                      value=datetime.now().date(),
                                      key="end_date")
         if st.button("Delete Logs in Range", type="secondary"):
@@ -596,13 +600,14 @@ elif st.session_state.mobile_verified:
     with tabs[3]:  # Developer Details Tab
         st.header("AI: The genius 🤖")
         st.subheader("""
-            Dhiraj: The one who takes credit (and the blame) 😎🔧
+            Dhiraj: The one who takes credit (and the blame) 😎
         """)
-
+        st.divider()
         st.markdown("""
-         Need Help ?   
-        -Please do email me at dhiraj1810.db@gmail.com if you have any questions or feedback   
-       -I’m open to new ideas and collaborations. Thank you for using this app! ✌🏽  
+         **Need Help ?**   
+        _-please do email me at dhiraj1810.db@gmail.com if you have any questions or feedback. I’m open to new ideas and collaborations._   
+          
+       **_-Thank you for using this app! ✌🏽_**  
             """)
         #st.write("Email : darkcoders2016@gmail.com")
 

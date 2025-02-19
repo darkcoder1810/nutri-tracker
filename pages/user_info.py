@@ -27,28 +27,29 @@ def show_user_info_form():
     with st.form("user_info_form"):
         st.subheader("Personal Information")
         # Get user info from sheet first
-        mobile = st.text_input("Mobile Number",
+        mobile = st.text_input("**Mobile Number**",
                                value=st.session_state.get('mobile', ''))
-        full_name = st.text_input("Full Name",
+        full_name = st.text_input("**Full Name**",
                                   value=st.session_state.user_info.get(
                                       'full_name', ''))
         saved_weight = float(st.session_state.user_info.get('weight', 70.0))
-        weight = st.number_input("Weight (kg)",
+        weight = st.number_input("**Weight (kg)**",
                                  min_value=20.0,
                                  max_value=200.0,
                                  value=saved_weight)
-        calorie_mode = st.radio("Calorie Mode",
+        calorie_mode = st.radio("**Calorie Mode**",
                                 ['maintenance', 'bulk', 'deficit'],
                                 index=['maintenance', 'bulk', 'deficit'].index(
                                     st.session_state.user_info.get(
                                         'calorie_mode', 'maintenance')))
 
-        st.subheader("Macro Settings [ leave default if not sure ]")
+        st.subheader("Macro Settings ")
+        st.write("_- leave default if you're not sure_")
         protein_per_kg = st.slider(
-            "Protein (g) per kg of bodyweight", 1.6, 3.0,
+            "**Protein (g) per kg of bodyweight**", 1.6, 3.0,
             float(st.session_state.user_info.get('protein_per_kg', 1.8)))
         fat_percent = st.slider(
-            "Fat (% of total calories)", 20, 35,
+            "**Fat (% of total calories)**", 20, 35,
             int(
                 float(st.session_state.user_info.get('fat_percent', 0.25)) *
                 100)) / 100

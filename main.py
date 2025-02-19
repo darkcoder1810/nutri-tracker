@@ -283,93 +283,129 @@ elif st.session_state.mobile_verified:
         selected_meal_type = st.selectbox("Select Meal Type",
                                           options=meal_options)
 
+        st.markdown("""
+        <style>
+        /* Default: display columns side by side */
+        .column {
+            display: flex;
+            vertical-align: top;
+            width: 30%; /* 3 columns in fullscreen */
+            box-sizing: border-box;
+            margin: 0.5rem; /* Add some margin for better spacing in fullscreen */
+        }
+        /* Stack columns in mobile view */
+        @media and (max-width: 640px) {
+            .column {
+                display: block;
+                width: calc(100% - 1rem); /* Full width in mobile, subtract margin */
+                margin: 0; /* Remove margin to eliminate space between columns */
+                padding: 0.5rem; /* Optional: Small padding for better touch targets */
+            }
+        }
+        /* Additional styling to override Streamlit default margins */
+        .stButton, .stSelectbox, .stTextInput {
+            margin: 0; /* Ensure no extra spacing for controls */
+        }
+        </style>
+        """,
+                    unsafe_allow_html=True)
+
+        # Layout configuration
+        st.container()
         with st.container():
-            col1, col2, col3 = st.columns([2, 1, 1])
+            # Column 1
+            st.markdown('<div class="column">', unsafe_allow_html=True)
 
-            with col1:
-                # Initialize the dropdown with an empty string placeholder
-                if 'food_selection' not in st.session_state:
-                    st.session_state.food_selection = ""  # Reset initial value
+            if 'food_selection' not in st.session_state:
+                st.session_state.food_selection = ""  # Reset initial value
 
-                food_selection = st.selectbox(
-                    f"Select food for {selected_meal_type}",
-                    options=[""] + food_db['Food Name'].tolist(),
-                    key=f"food_select_{selected_meal_type}")
+            food_selection = st.selectbox(
+                f"Select food for {selected_meal_type}",
+                options=[""] + food_db['Food Name'].tolist(),
+                key=f"food_select_{selected_meal_type}")
 
-            with col2:
-                # Initialize portion variable
-                if food_selection:  # Proceed only if food_selection is not empty
-                    selected_food = food_db[food_db['Food Name'] ==
-                                            food_selection].iloc[0]
-                    basis = selected_food.get('Basis', 'gm')
+            #st.markdown('</div>', unsafe_allow_html=True)
 
-                    # Display portion input with dynamic unit
-                    portion_unit = 'p' if basis == 'p' else (
-                        'ml' if basis == 'ml' else 'gm')
+            # Column 2
+            #st.markdown('<div class="column">', unsafe_allow_html=True)
 
-                    if 'portion' not in st.session_state:
-                        st.session_state.portion = 0.0  # Set initial value as a float
+            if food_selection:  # Proceed only if food_selection is not empty
+                selected_food = food_db[food_db['Food Name'] ==
+                                        food_selection].iloc[0]
+                basis = selected_food.get('Basis', 'gm')
 
-                    portion = st.number_input(
-                        f"Portion ({portion_unit})",
-                        min_value=0.0,  # Float
-                        max_value=1000.0,  # Float
-                        step=1.0 if basis == 'p' else 10.0,  # Float
-                        value=float(
-                            st.session_state.portion),  # Ensure value is float
-                        key=f"portion_{selected_meal_type}")
+                # Display portion input with dynamic unit
+                portion_unit = 'p' if basis == 'p' else (
+                    'ml' if basis == 'ml' else 'gm')
+
+                if 'portion' not in st.session_state:
+                    st.session_state.portion = 0.0  # Set initial value as a float
+
+                portion = st.number_input(
+                    f"Portion ({portion_unit})",
+                    min_value=0.0,  # Float
+                    max_value=1000.0,  # Float
+                    step=1.0 if basis == 'p' else 10.0,  # Float
+                    value=float(
+                        st.session_state.portion),  # Ensure value is float
+                    key=f"portion_{selected_meal_type}")
+            else:
+                portion = 0.0  # Reset portion input as a float
+
+            #st.markdown('</div>', unsafe_allow_html=True)
+
+            # Column 3
+            #st.markdown('<div class="column">', unsafe_allow_html=True)
+
+            if st.button("Add", key=f"add_{selected_meal_type}"):
+                if food_selection:  # Proceed if valid food is selected
+                    food_item = food_db[food_db['Food Name'] ==
+                                        food_selection].iloc[0]
+                    base_weight = 100 if basis != 'p' else 1
+                    multiplier = portion / base_weight
+
+                    logged_item = {
+                        'name': food_item['Food Name'],
+                        'calories': food_item['Calories'] * multiplier,
+                        'protein': food_item['Protein'] * multiplier,
+                        'fat': food_item['Fat'] * multiplier,
+                        'carbs': food_item['Carbs'] * multiplier,
+                        'portion': portion,
+                        'unit': portion_unit
+                    }
+
+                    # Add to session state
+                    st.session_state.daily_log[
+                        selected_meal_type.lower()] = logged_item
+
+                    # Save to daily log sheet
+                    meal_log = {
+                        'mobile': st.session_state.mobile,
+                        'meal_type': selected_meal_type,
+                        'weight': portion,
+                        'basis': basis,
+                        'food_name': food_item['Food Name'],
+                        'category': food_item.get('Category', 'N/A'),
+                        'calories': logged_item['calories'],
+                        'protein': logged_item['protein'],
+                        'carbs': logged_item['carbs'],
+                        'fat': logged_item['fat']
+                    }
+                    save_meal_log(meal_log)
+
+                    st.success(
+                        f"{food_item['Food Name']} added for {selected_meal_type}!"
+                    )
+
+                    # Reset inputs after adding a meal
+                    st.session_state.food_selection = ""  # Reset food selection
+                    st.session_state.portion = 0.0  # Reset portion input
+
+                    st.rerun()  # Refresh the UI
                 else:
-                    portion = 0.0  # Reset portion input as a float
+                    st.warning("Please select a food item.")
 
-            with col3:
-                if st.button("Add", key=f"add_{selected_meal_type}"):
-                    if food_selection:  # Proceed if valid food is selected
-                        food_item = food_db[food_db['Food Name'] ==
-                                            food_selection].iloc[0]
-                        base_weight = 100 if basis != 'p' else 1
-                        multiplier = portion / base_weight
-
-                        logged_item = {
-                            'name': food_item['Food Name'],
-                            'calories': food_item['Calories'] * multiplier,
-                            'protein': food_item['Protein'] * multiplier,
-                            'fat': food_item['Fat'] * multiplier,
-                            'carbs': food_item['Carbs'] * multiplier,
-                            'portion': portion,
-                            'unit': portion_unit
-                        }
-
-                        # Add to session state
-                        st.session_state.daily_log[
-                            selected_meal_type.lower()] = logged_item
-
-                        # Save to daily log sheet
-                        meal_log = {
-                            'mobile': st.session_state.mobile,
-                            'meal_type': selected_meal_type,
-                            'weight': portion,
-                            'basis': basis,
-                            'food_name': food_item['Food Name'],
-                            'category': food_item.get('Category', 'N/A'),
-                            'calories': logged_item['calories'],
-                            'protein': logged_item['protein'],
-                            'carbs': logged_item['carbs'],
-                            'fat': logged_item['fat']
-                        }
-                        save_meal_log(meal_log)
-
-                        st.success(
-                            f"{food_item['Food Name']} added for {selected_meal_type}!"
-                        )
-
-                        # Reset inputs after adding a meal
-                        st.session_state.food_selection = ""  # Reset food selection
-                        st.session_state.portion = 0.0  # Reset portion input
-
-                        st.rerun()  # Refresh the UI
-
-                    else:
-                        st.warning("Please select a food item.")
+            st.markdown('</div>', unsafe_allow_html=True)
 
     with tabs[1]:  # Add Food tab
         st.header("Add New Food")

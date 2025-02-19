@@ -44,7 +44,7 @@ def show_user_info_form():
                                         'calorie_mode', 'maintenance')))
 
         st.subheader("Macro Settings ")
-        st.write("_- leave default if you're not sure_")
+        st.write("_- leave default if you're unaware_")
         protein_per_kg = st.slider(
             "**Protein (g) per kg of bodyweight**", 1.6, 3.0,
             float(st.session_state.user_info.get('protein_per_kg', 1.8)))
